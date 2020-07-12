@@ -1,0 +1,1 @@
+GET     /movies                         controllers.MovieController.movies
