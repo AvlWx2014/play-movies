@@ -1,14 +1,17 @@
 package persistence
 
-import java.util.UUID
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale, UUID}
 
 import akka.actor.ActorSystem
+import controllers.MovieFormInput
 import javax.inject.{Inject, Singleton}
 import play.api.{Logger, MarkerContext}
 import play.api.libs.concurrent.CustomExecutionContext
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, JsPath, JsResult, JsString, JsSuccess, JsValue, Json, Reads, Writes}
 
 import scala.concurrent.Future
+import scala.util.Try
 
 class MovieId private(val underlying: UUID) extends AnyVal {
   override def toString: String = underlying.toString
@@ -27,10 +30,9 @@ object MovieId {
   }
 }
 
-final case class MovieData(id: MovieId, title: String, year: Int, rated: String, released: String, genre: Seq[String])
+final case class Movie(id: MovieId, title: String, year: Int, rated: String, released: Date, genre: Seq[String])
 
-object MovieData {
-  implicit val format: Format[MovieData] = Json.format
+object Movie {
   implicit object dateFormat extends Format[Date] {
     private val dateFormatter = new SimpleDateFormat("yyyy-MM-dd")
     override def writes(date: Date): JsValue = {
@@ -91,11 +93,11 @@ class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
   private val logger = Logger(getClass)
 
   private var repo = List(
-    MovieData(MovieId("a74a68f7-c7cd-4cfe-b0f7-5694974d41e2"), "Pulp Fiction", 1994, "R", "10/14/1994", Seq("Crime", "Drama")),
-    MovieData(MovieId("13b1e331-3e27-42fc-a2ff-00e3e07ba185"), "Goodfellas", 1990, "R", "09/21/1990", Seq("Biography", "Crime", "Drama")),
-    MovieData(MovieId("c208af22-57dc-4589-90c0-00bd2096d9a5"), "Jurassic Park", 1993, "PG-13", "06/11/1993", Seq("Action", "Adventure", "Sci-Fi")),
-    MovieData(MovieId("16fee969-0b99-4468-b380-5cc348408c22"), "Chicago", 2002, "PG-13", "01/24/2003", Seq("Comedy", "Crime", "Musical")),
-    MovieData(MovieId("7c51ee06-c252-4291-ad28-e81bf096073a"), "Sleepless in Seattle", 1993, "PG", "06/25/1993", Seq("Comedy", "Drama", "Romance"))
+    Movie(MovieId("a74a68f7-c7cd-4cfe-b0f7-5694974d41e2"), "Pulp Fiction", 1994, "R", dateParser.parse("1994-10-14"), Seq("Crime", "Drama")),
+    Movie(MovieId("13b1e331-3e27-42fc-a2ff-00e3e07ba185"), "Goodfellas", 1990, "R", dateParser.parse("1990-09-21"), Seq("Biography", "Crime", "Drama")),
+    Movie(MovieId("c208af22-57dc-4589-90c0-00bd2096d9a5"), "Jurassic Park", 1993, "PG-13", dateParser.parse("1993-06-11"), Seq("Action", "Adventure", "Sci-Fi")),
+    Movie(MovieId("16fee969-0b99-4468-b380-5cc348408c22"), "Chicago", 2002, "PG-13", dateParser.parse("2003-01-24"), Seq("Comedy", "Crime", "Musical")),
+    Movie(MovieId("7c51ee06-c252-4291-ad28-e81bf096073a"), "Sleepless in Seattle", 1993, "PG", dateParser.parse("1993-06-25"), Seq("Comedy", "Drama", "Romance"))
   )
 
   /**
@@ -106,7 +108,24 @@ class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
    * @param mc
    * @return
    */
-//  override def add(data: MovieData)(implicit mc: MarkerContext): Future[MovieId] = ???
+  override def add(data: Movie)(implicit mc: MarkerContext): Future[Movie] = {
+    Future {
+      logger.info(s"New Movie: $data")
+      val found = repo.find {
+        case Movie(_, data.title, data.year, data.rated, data.released, data.genre) => true
+        case _ => false
+      }
+
+      if (found.isDefined) {
+        logger.info("Found a movie matching the submitted")
+        found.get
+      } else {
+        logger.info("Movie not found. Adding!")
+        repo = data :: repo
+        data
+      }
+    }
+  }
 
   override def getAll()(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
     Future{
@@ -128,4 +147,20 @@ class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
       repo.filter(data => data.title == title)
     }
   }
+
+  override def delete(id: String)(implicit mc: MarkerContext): Future[Option[Movie]] = {
+    Future {
+      val uuid = UUID.fromString(id)
+      val found = repo.find( data =>
+        data.id.underlying == uuid
+      )
+
+      if (found.isDefined) {
+        repo = repo diff List(found)
+      }
+
+      found
+    }
+  }
+
 }
