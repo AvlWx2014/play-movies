@@ -31,6 +31,31 @@ final case class MovieData(id: MovieId, title: String, year: Int, rated: String,
 
 object MovieData {
   implicit val format: Format[MovieData] = Json.format
+  implicit object dateFormat extends Format[Date] {
+    private val dateFormatter = new SimpleDateFormat("yyyy-MM-dd")
+    override def writes(date: Date): JsValue = {
+      JsString(dateFormatter.format(date))
+    }
+    override def reads(json: JsValue): JsResult[Date] = {
+      val try_ = Try[Date](dateFormatter.parse(json.as[String]))
+      JsResult.fromTry(try_)
+    }
+  }
+
+  implicit val format: Format[Movie] = Json.format
+
+  def apply(form: MovieFormInput): Movie = {
+    require(form != null)
+    val id = MovieId(UUID.randomUUID().toString)
+    new Movie(
+      id,
+      form.title,
+      form.year,
+      form.rated,
+      form.released,
+      form.genre
+    )
+  }
 }
 
 trait MovieRepository {
