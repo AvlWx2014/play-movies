@@ -41,14 +41,16 @@ trait MovieRepository {
    * @param mc
    * @return
    */
-//  def add(data: MovieData)(implicit mc: MarkerContext): Future[MovieId]
+  def add(data: Movie)(implicit mc: MarkerContext): Future[Movie]
 
-  def list()(implicit mc: MarkerContext): Future[Iterable[MovieData]]
+  def getAll()(implicit mc: MarkerContext): Future[Iterable[Movie]]
 
-  def genre(genre: String)(implicit mc: MarkerContext): Future[Iterable[MovieData]]
+  def get(title: String)(implicit mc: MarkerContext): Future[Iterable[Movie]]
 
-  def get(name: String)(implicit mc: MarkerContext): Future[Iterable[MovieData]]
+  def genre(genre: String)(implicit mc: MarkerContext): Future[Iterable[Movie]]
 
+  def delete(id: String)(implicit mc: MarkerContext): Future[Option[Movie]]
+}
 }
 
 class DataExecutionContext @Inject()(actorSystem: ActorSystem)
@@ -78,21 +80,21 @@ class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
    */
 //  override def add(data: MovieData)(implicit mc: MarkerContext): Future[MovieId] = ???
 
-  override def list()(implicit mc: MarkerContext): Future[Iterable[MovieData]] = {
+  override def getAll()(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
     Future{
       logger.info(s"list: ")
       repo
     }
   }
 
-  override def genre(genre: String)(implicit mc: MarkerContext): Future[Iterable[MovieData]] = {
+  override def genre(genre: String)(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
     Future {
       logger.info(s"genre: $genre")
       repo.filter( data => data.genre contains genre)
     }
   }
 
-  override def get(title: String)(implicit mc: MarkerContext): Future[Iterable[MovieData]] = {
+  override def get(title: String)(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
     Future {
       logger.info(s"title: $title")
       repo.filter(data => data.title == title)
