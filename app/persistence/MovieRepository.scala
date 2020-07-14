@@ -51,6 +51,9 @@ trait MovieRepository {
 
   def delete(id: String)(implicit mc: MarkerContext): Future[Option[Movie]]
 }
+
+abstract class AbstractMovieRepository @Inject()(implicit ec: DataExecutionContext) extends MovieRepository {
+  protected val dateParser = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
 }
 
 class DataExecutionContext @Inject()(actorSystem: ActorSystem)
@@ -58,7 +61,7 @@ class DataExecutionContext @Inject()(actorSystem: ActorSystem)
 
 @Singleton
 class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
-    extends MovieRepository {
+    extends AbstractMovieRepository {
 
   private val logger = Logger(getClass)
 
