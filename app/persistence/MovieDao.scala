@@ -25,30 +25,6 @@ class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionCont
   override def getAll()(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
     val c = database.getCollection("movies")
     c.find[Movie]().toFuture()
-//          collection.find().subscribe(new Subscriber[Document] {
-      //      override def onSubscribe(s: Subscription): Unit = {
-      //        logger.info(s"Subscribing: $s")
-      //        // from the Reactive Mongo Tour
-      //        // immediately request everything from the database
-      //        // https://github.com/mongodb/mongo-java-driver-reactivestreams/blob/master/examples/tour/src/main/tour/SubscriberHelpers.java
-      //        // send me everything
-      //        // another value, like 10, would only get 10 emissions before completing
-      //        s.request(Integer.MAX_VALUE)
-      //      }
-      //
-      //      override def onNext(t: Document): Unit = {
-      //        logger.info(s"Emission: $t")
-      //      }
-      //
-      //      override def onError(t: Throwable): Unit = {
-      //        logger.error(s"[!] Error: $t")
-      //      }
-      //
-      //      override def onComplete(): Unit = {
-      //        logger.info(s"Complete")
-      //      }
-      //    })
-//    Future.successful(List())
   }
 
   override def genre(genre: String)(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
