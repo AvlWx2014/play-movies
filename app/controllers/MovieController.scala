@@ -62,24 +62,6 @@ class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRep
    * @return
    */
   def movies: Action[AnyContent] = Action.async { implicit request =>
-//    val g = request.getQueryString("genre")
-//    val t = request.getQueryString("title")
-//    logger.info(s"movies: $g & $t")
-//    repo.getAll().map { movies =>
-//      movies.filter(movie =>
-//        g match {
-//          case Some(_) => movie.genre contains g.get
-//          case None => true
-//        }
-//      ).filter(movie =>
-//        t match {
-//          case Some(_) => movie.title == t.get
-//          case None => true
-//        }
-//      )
-//    }.map {movies =>
-//      Ok(Json.toJson(movies))
-//    }
     logger.info(s"movies")
     repo.getAll().map { movies =>
       Ok(Json.toJson(movies))
