@@ -11,7 +11,8 @@ lazy val root = (project in file("."))
       libraryDependencies ++= Seq(
         guice,
         "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
-        "org.mongodb" % "mongo-java-driver" % "3.9.1",
+        "org.mongodb.scala" % "mongo-scala-driver_2.13" % "4.0.5",
+//        "org.mongodb" % "mongodb-driver-sync" % "4.0.5",
         "net.codingwell" %% "scala-guice" % "4.2.6"
       ),
       scalacOptions ++= Seq(
