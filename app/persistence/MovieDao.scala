@@ -3,12 +3,15 @@ package persistence
 import javax.inject.{Inject, Singleton}
 import org.mongodb.scala.{Document, MongoDatabase}
 import play.api.{Logger, MarkerContext}
+import org.mongodb.scala.model.Filters._
+import org.reactivestreams.{Subscriber, Subscription}
 
 import scala.concurrent.Future
 
 @Singleton
 class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionContext) extends AbstractMovieRepository {
   private val logger = Logger(getClass)
+  private val collection = database.getCollection("movies")
 
   /**
    * Return the MovieId so that the repository impl can use the return value to
@@ -23,16 +26,18 @@ class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionCont
   }
 
   override def getAll()(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
-    val c = database.getCollection("movies")
-    c.find[Movie]().toFuture()
+    logger.info("getAll: ")
+    collection.find[Movie]().toFuture()
   }
 
   override def genre(genre: String)(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
-    Future.failed(new NotImplementedError("Not Implemented"))
+    logger.info(s"genre: $genre")
+    collection.find[Movie](Document("genre" -> genre)).toFuture()
   }
 
   override def get(name: String)(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
-    Future.failed(new NotImplementedError("Not Implemented"))
+    logger.info(s"get: $name")
+    collection.find[Movie](Document("title" -> name)).toFuture()
   }
 
   override def delete(id: String)(implicit mc: MarkerContext): Future[Option[Movie]] = {
