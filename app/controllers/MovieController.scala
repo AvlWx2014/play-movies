@@ -71,8 +71,8 @@ class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRep
   def delete(id: String): Action[AnyContent] = Action.async { implicit request =>
     logger.info(s"delete: $id")
     repo.delete(id).map {
-      case option@Some(_) => Ok(Json.toJson(option.get))
-      case _ => BadRequest(Json.toJson(id))
+      case true => Ok
+      case false => NotFound
     }
   }
 
