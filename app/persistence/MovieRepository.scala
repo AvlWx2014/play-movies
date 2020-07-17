@@ -86,11 +86,11 @@ class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
   private val logger = Logger(getClass)
 
   private var repo = List(
-    Movie(MovieId("a74a68f7-c7cd-4cfe-b0f7-5694974d41e2"), "Pulp Fiction", 1994, "R", dateParser.parse("1994-10-14"), Seq("Crime", "Drama")),
-    Movie(MovieId("13b1e331-3e27-42fc-a2ff-00e3e07ba185"), "Goodfellas", 1990, "R", dateParser.parse("1990-09-21"), Seq("Biography", "Crime", "Drama")),
-    Movie(MovieId("c208af22-57dc-4589-90c0-00bd2096d9a5"), "Jurassic Park", 1993, "PG-13", dateParser.parse("1993-06-11"), Seq("Action", "Adventure", "Sci-Fi")),
-    Movie(MovieId("16fee969-0b99-4468-b380-5cc348408c22"), "Chicago", 2002, "PG-13", dateParser.parse("2003-01-24"), Seq("Comedy", "Crime", "Musical")),
-    Movie(MovieId("7c51ee06-c252-4291-ad28-e81bf096073a"), "Sleepless in Seattle", 1993, "PG", dateParser.parse("1993-06-25"), Seq("Comedy", "Drama", "Romance"))
+    Movie(new ObjectId("5f11ce8100a8d811a28e3cde"), "Pulp Fiction", 1994, "R", dateParser.parse("1994-10-14"), Seq("Crime", "Drama")),
+    Movie(new ObjectId("5f11ceaa4a41c4b571f5b755"), "Goodfellas", 1990, "R", dateParser.parse("1990-09-21"), Seq("Biography", "Crime", "Drama")),
+    Movie(new ObjectId("5f11ceaf156556a2ff532817"), "Jurassic Park", 1993, "PG-13", dateParser.parse("1993-06-11"), Seq("Action", "Adventure", "Sci-Fi")),
+    Movie(new ObjectId("5f11ceb3cf9c4b83a1dc4e7c"), "Chicago", 2002, "PG-13", dateParser.parse("2003-01-24"), Seq("Comedy", "Crime", "Musical")),
+    Movie(new ObjectId("5f11ceb792af170af673a224"), "Sleepless in Seattle", 1993, "PG", dateParser.parse("1993-06-25"), Seq("Comedy", "Drama", "Romance"))
   )
 
   /**
