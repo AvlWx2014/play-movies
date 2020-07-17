@@ -1,6 +1,7 @@
 package persistence
 
 import javax.inject.{Inject, Singleton}
+import org.bson.types.ObjectId
 import org.mongodb.scala.{Document, MongoDatabase}
 import play.api.{Logger, MarkerContext}
 import org.mongodb.scala.model.Filters._
@@ -40,7 +41,9 @@ class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionCont
     collection.find[Movie](Document("title" -> name)).toFuture()
   }
 
-  override def delete(id: String)(implicit mc: MarkerContext): Future[Option[Movie]] = {
-    Future.failed(new NotImplementedError("Not Implemented"))
+  override def delete(id: String)(implicit mc: MarkerContext): Future[Boolean] = {
+    collection.deleteOne(Document("_id" -> new ObjectId(id))).toFuture().map {response =>
+      response.getDeletedCount > 0
+    }
   }
 }

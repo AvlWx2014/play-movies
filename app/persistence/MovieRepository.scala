@@ -6,6 +6,8 @@ import java.util.{Date, Locale, UUID}
 import akka.actor.ActorSystem
 import controllers.MovieFormInput
 import javax.inject.{Inject, Singleton}
+import org.bson.codecs.ObjectIdGenerator
+import org.bson.types.ObjectId
 import play.api.{Logger, MarkerContext}
 import play.api.libs.concurrent.CustomExecutionContext
 import play.api.libs.json.{Format, JsPath, JsResult, JsString, JsSuccess, JsValue, Json, Reads, Writes}
@@ -69,7 +71,7 @@ trait MovieRepository {
 
   def genre(genre: String)(implicit mc: MarkerContext): Future[Iterable[Movie]]
 
-  def delete(id: String)(implicit mc: MarkerContext): Future[Option[Movie]]
+  def delete(id: String)(implicit mc: MarkerContext): Future[Boolean]
 }
 
 abstract class AbstractMovieRepository @Inject()(implicit ec: DataExecutionContext) extends MovieRepository {
@@ -141,18 +143,18 @@ class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
     }
   }
 
-  override def delete(id: String)(implicit mc: MarkerContext): Future[Option[Movie]] = {
+  override def delete(id: String)(implicit mc: MarkerContext): Future[Boolean] = {
     Future {
-      val uuid = UUID.fromString(id)
       val found = repo.find( data =>
-        data.id.underlying == uuid
+        data._id.toString == id
       )
 
-      if (found.isDefined) {
-        repo = repo diff List(found)
+      found match {
+        case Some(_) =>
+          repo = repo diff List(found)
+          true
+        case _ => false
       }
-
-      found
     }
   }
 
