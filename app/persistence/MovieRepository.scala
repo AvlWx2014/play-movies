@@ -13,24 +13,7 @@ import play.api.libs.json.{Format, JsPath, JsResult, JsString, JsSuccess, JsValu
 import scala.concurrent.Future
 import scala.util.Try
 
-class MovieId private(val underlying: UUID) extends AnyVal {
-  override def toString: String = underlying.toString
-}
-
-object MovieId {
-  implicit val format: Format[MovieId] = Json.format
-
-  def apply(raw: String): MovieId = {
-    require(raw != null)
-    new MovieId(UUID.fromString(raw))
-  }
-
-  def unapply(arg: MovieId): Option[String] = {
-    Option(arg.underlying.toString)
-  }
-}
-
-final case class Movie(id: MovieId, title: String, year: Int, rated: String, released: Date, genre: Seq[String])
+final case class Movie(_id: ObjectId, title: String, year: Int, rated: String, released: Date, genre: Seq[String])
 
 object Movie {
   implicit object dateFormat extends Format[Date] {
@@ -44,11 +27,21 @@ object Movie {
     }
   }
 
+  implicit object objectIdFormatter extends Format[ObjectId] {
+    override def reads(json: JsValue): JsResult[ObjectId] = {
+      JsResult.fromTry(Try[ObjectId](new ObjectId(json.as[String])))
+    }
+
+    override def writes(o: ObjectId): JsValue = {
+      JsString(o.toString)
+    }
+  }
+
   implicit val format: Format[Movie] = Json.format
 
   def apply(form: MovieFormInput): Movie = {
     require(form != null)
-    val id = MovieId(UUID.randomUUID().toString)
+    val id = new ObjectId()
     new Movie(
       id,
       form.title,
