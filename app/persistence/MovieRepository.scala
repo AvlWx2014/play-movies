@@ -63,7 +63,7 @@ trait MovieRepository {
    * @param mc
    * @return
    */
-  def add(data: Movie)(implicit mc: MarkerContext): Future[Movie]
+  def add(data: Movie)(implicit mc: MarkerContext): Future[CreateMovieResult]
 
   def getAll()(implicit mc: MarkerContext): Future[Iterable[Movie]]
 
@@ -108,7 +108,7 @@ class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
    * @param mc
    * @return
    */
-  override def add(data: Movie)(implicit mc: MarkerContext): Future[Movie] = {
+  override def add(data: Movie)(implicit mc: MarkerContext): Future[CreateMovieResult] = {
     Future {
       logger.info(s"New Movie: $data")
       val found = repo.find {
@@ -118,11 +118,11 @@ class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
 
       if (found.isDefined) {
         logger.info("Found a movie matching the submitted")
-        found.get
+        Persisted(found.get)
       } else {
         logger.info("Movie not found. Adding!")
         repo = data :: repo
-        data
+        New(data)
       }
     }
   }

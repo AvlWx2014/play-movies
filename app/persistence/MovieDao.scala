@@ -23,7 +23,8 @@ class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionCont
    * @param mc
    * @return
    */
-  def add(data: Movie)(implicit mc: MarkerContext): Future[Movie] = {
+  def add(data: Movie)(implicit mc: MarkerContext): Future[CreateMovieResult] = {
+    logger.info(s"add() called in execution context ${Thread.currentThread().getName}")
     val document = Document(
       "_id" -> data._id,
       "title" -> data.title,
@@ -52,14 +53,14 @@ class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionCont
           .toFuture()
           .map { result =>
             if (result.wasAcknowledged()) {
-              data
+              New(data)
             } else {
-              data
+              Failed(data)
             }
           }
       case Some(_) =>
         logger.info("Found a match. Returning it...")
-        Future.successful(option.get)
+        Future.successful(Persisted(option.get))
     }
   }
 
