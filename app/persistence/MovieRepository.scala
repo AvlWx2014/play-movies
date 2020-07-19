@@ -74,6 +74,11 @@ trait MovieRepository {
   def delete(id: String)(implicit mc: MarkerContext): Future[Boolean]
 }
 
+sealed abstract class CreateMovieResult(val movie: Movie)
+case class New(override val movie: Movie) extends CreateMovieResult(movie)
+case class Persisted(override val movie: Movie) extends CreateMovieResult(movie)
+case class Failed(override val movie: Movie) extends CreateMovieResult(movie)
+
 abstract class AbstractMovieRepository @Inject()(implicit ec: DataExecutionContext) extends MovieRepository {
   protected val dateParser = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
 }
