@@ -1,13 +1,14 @@
 package persistence
 
+import java.util.concurrent.TimeUnit
+
 import javax.inject.{Inject, Singleton}
 import org.bson.types.ObjectId
 import org.mongodb.scala.{Document, MongoDatabase}
 import play.api.{Logger, MarkerContext}
-import org.mongodb.scala.model.Filters._
-import org.reactivestreams.{Subscriber, Subscription}
 
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 @Singleton
 class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionContext) extends AbstractMovieRepository {
@@ -23,7 +24,43 @@ class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionCont
    * @return
    */
   def add(data: Movie)(implicit mc: MarkerContext): Future[Movie] = {
-    Future.failed(new NotImplementedError("Not Implemented"))
+    val document = Document(
+      "_id" -> data._id,
+      "title" -> data.title,
+      "year" -> data.year,
+      "rated" -> data.rated,
+      "released" -> data.released,
+      "genre" -> data.genre
+    )
+
+    logger.info(s"Awaiting find...")
+    val option = Await.result(collection.find[Movie](
+      Document(
+        "title" -> data.title,
+        "year" -> data.year,
+        "rated" -> data.rated,
+        "released" -> data.released
+      ))
+      .first()
+      .toFutureOption(), Duration(1.0, TimeUnit.SECONDS))
+    logger.info(s"Option returned: $option")
+
+    option match {
+      case None =>
+        logger.info(s"No match found. Inserting...")
+        collection.insertOne(document)
+          .toFuture()
+          .map { result =>
+            if (result.wasAcknowledged()) {
+              data
+            } else {
+              data
+            }
+          }
+      case Some(_) =>
+        logger.info("Found a match. Returning it...")
+        Future.successful(option.get)
+    }
   }
 
   override def getAll()(implicit mc: MarkerContext): Future[Iterable[Movie]] = {
