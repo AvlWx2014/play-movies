@@ -6,23 +6,23 @@ import javax.inject.{Inject, Singleton}
 import org.bson.types.ObjectId
 import org.mongodb.scala.{Document, MongoDatabase}
 import play.api.{Logger, MarkerContext}
+import play.libs.Akka
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
+/**
+ * An implementation of the `AbstractMovieRepository` that has a database backend.
+ *
+ * @param database  The database implementation, in this case MongoDatabase
+ * @param ec      An implicit custom ExecutionContext to avoid repository
+ *                operations on Play's main ExecutionContext
+ */
 @Singleton
 class MovieDao @Inject()(database: MongoDatabase)(implicit ec: DataExecutionContext) extends AbstractMovieRepository {
   private val logger = Logger(getClass)
   private val collection = database.getCollection("movies")
 
-  /**
-   * Return the MovieId so that the repository impl can use the return value to
-   * to stick movies in the genre-based collections
-   *
-   * @param data
-   * @param mc
-   * @return
-   */
   def add(data: Movie)(implicit mc: MarkerContext): Future[CreateMovieResult] = {
     logger.info(s"add() called in execution context ${Thread.currentThread().getName}")
     val document = Document(

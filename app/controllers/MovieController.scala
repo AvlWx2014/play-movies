@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
 import javax.inject.Inject
-import persistence.{MovieDao, Movie, MovieRepository}
+import persistence.{CreateMovieResult, Failed, Movie, MovieDao, MovieRepository, New, Persisted}
 import play.api.Logger
 import play.api.data.Form
 import play.api.libs.json.Json
@@ -97,7 +97,13 @@ class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRep
 
     def success(input: MovieForm) = {
       val data = Movie(input)
-      repo.add(data).map { returned => Ok(Json.toJson(returned)) }
+      repo.add(data).map { result: CreateMovieResult =>
+        result match {
+          case New(_) => Created(Json.toJson(result.movie))
+          case Persisted(_) => Ok(Json.toJson(result.movie))
+          case Failed(_) => BadRequest(Json.toJson(result.movie))
+        }
+      }
     }
 
     form.bindFromRequest().fold(failure, success)
