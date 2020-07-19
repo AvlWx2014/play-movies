@@ -143,6 +143,20 @@ trait MovieRepository {
   def delete(id: String)(implicit mc: MarkerContext): Future[Boolean]
 }
 
+/**
+ * A sealed type hierarchy to model the different result
+ * scenarios related to creating a movie in an idempotent manner.
+ *
+ * This allows the controller to differentiate between different
+ * results and return more representative HTTP status codes.
+ *
+ * New - A new movie entry was added to the repository successfully
+ * Persisted - A movie with the same title, year, rating, and release
+ *              date already exists in the repository - return that one
+ * Failed - The repository failed to add the subject
+ *
+ * @param movie   The subject of the create request
+ */
 sealed abstract class CreateMovieResult(val movie: Movie)
 case class New(override val movie: Movie) extends CreateMovieResult(movie)
 case class Persisted(override val movie: Movie) extends CreateMovieResult(movie)
@@ -159,6 +173,10 @@ abstract class AbstractMovieRepository @Inject()(implicit ec: DataExecutionConte
   protected val dateParser = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
 }
 
+/**
+ * Custom ExecutionContext
+ * @param actorSystem   The injected Akka ActorSystem
+ */
 class DataExecutionContext @Inject()(actorSystem: ActorSystem)
   extends CustomExecutionContext(actorSystem, "data.persistence")
 

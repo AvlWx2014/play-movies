@@ -7,6 +7,12 @@ import play.api.routing.SimpleRouter
 import play.api.routing.sird._
 import play.api.Logger
 
+/**
+ * A custom Router object that uses Play's SIRD
+ * to parse query parameters and route those requests to
+ * the appropriate controller methods.
+ * @param controller    The Controller
+ */
 class MovieRouter @Inject()(controller: MovieController) extends SimpleRouter {
   val prefix = "/movies"
   val logger = Logger(getClass)
@@ -29,7 +35,7 @@ class MovieRouter @Inject()(controller: MovieController) extends SimpleRouter {
       controller.delete(id)
 
     case GET(p"/") =>
-      logger.info(s"Root URI")
+      logger.info(s"GET: /")
       controller.movies
   }
 }
