@@ -12,20 +12,20 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class MovieFormInput(title: String, year: Int, rated: String, released: Date, genre: Seq[String])
+case class MovieForm(title: String, year: Int, rated: String, released: Date, genre: Seq[String])
 
-object MovieFormInput {
+object MovieForm {
 
   /**
    * Defining custom apply/unapply per this SO post for a seq
    * https://stackoverflow.com/a/27267673/5189340
    */
-  def apply(title: String, year: Int, rated: String, released: Date, genre: String): MovieFormInput = {
+  def apply(title: String, year: Int, rated: String, released: Date, genre: String): MovieForm = {
     val seq = genre.split(",").toSeq
-    new MovieFormInput(title, year, rated, released, seq)
+    new MovieForm(title, year, rated, released, seq)
   }
 
-  def unapply(arg: MovieFormInput): Option[(String, Int, String, Date, String)] = {
+  def unapply(arg: MovieForm): Option[(String, Int, String, Date, String)] = {
     val str = arg.genre.mkString(",")
     Option(arg.title, arg.year, arg.rated, arg.released, str)
   }
@@ -37,7 +37,7 @@ class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRep
 
   private val logger = Logger(getClass)
 
-  private val form: Form[MovieFormInput] = {
+  private val form: Form[MovieForm] = {
     import play.api.data.Forms._
 
     Form(
@@ -47,7 +47,7 @@ class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRep
         "rated" -> nonEmptyText,
         "released" -> date("yyyy-MM-dd"),
         "genre" -> text
-      )(MovieFormInput.apply)(MovieFormInput.unapply)
+      )(MovieForm.apply)(MovieForm.unapply)
     )
   }
 
@@ -91,11 +91,11 @@ class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRep
   }
 
   private def processFormInput[A]()(implicit request: Request[A]): Future[Result] = {
-    def failure(bad: Form[MovieFormInput]) = {
+    def failure(bad: Form[MovieForm]) = {
       Future.successful(BadRequest(form.errorsAsJson))
     }
 
-    def success(input: MovieFormInput) = {
+    def success(input: MovieForm) = {
       val data = Movie(input)
       repo.add(data).map { returned => Ok(Json.toJson(returned)) }
     }
