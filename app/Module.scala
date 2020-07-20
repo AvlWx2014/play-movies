@@ -16,8 +16,8 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
 
   @Provides
   def provideDatabase(codecRegistry: CodecRegistry): MongoDatabase = {
-    // connect directly to localhost:27017 by default
-    val mongoClient = MongoClient()
+    // connect directly to port 27017 by default
+    val mongoClient = MongoClient("mongodb://mongo")
     mongoClient.getDatabase("demo").withCodecRegistry(codecRegistry)
   }
 

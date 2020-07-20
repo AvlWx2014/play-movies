@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+  app:
+    build: ./
+    container_name: play-server
+    depends_on: 
+      - mongo
+    ports: 
+      - "9000:9000"
+    
