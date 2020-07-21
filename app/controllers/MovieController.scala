@@ -1,10 +1,9 @@
 package controllers
 
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
+import java.util.Date
 
 import javax.inject.Inject
-import persistence.{CreateMovieResult, Failed, Movie, MovieDao, MovieRepository, New, Persisted}
+import persistence._
 import play.api.Logger
 import play.api.data.Form
 import play.api.libs.json.Json
@@ -12,8 +11,19 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+ * A model class representing form-data sent with a POST request.
+ * @param title     The movie title
+ * @param year      The year the movie was released
+ * @param rated     The movie rating
+ * @param released  The release date of the movie
+ * @param genre     A comma-delimited list of genre tags for the movie
+ */
 case class MovieForm(title: String, year: Int, rated: String, released: Date, genre: Seq[String])
 
+/**
+ * Companion object to our MovieForm case class
+ */
 object MovieForm {
 
   /**
@@ -31,6 +41,16 @@ object MovieForm {
   }
 }
 
+/**
+ * The Controller. Takes requests and produces results.
+ *
+ * This takes the implicit default execution context because
+ * no long-running operations happen here.
+ *
+ * @param dcc   An instance of DefaultControllerComponents
+ * @param repo  The repository implementation
+ * @param ec    An implicit ExecutionContext
+ */
 class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRepository)(implicit ec: ExecutionContext)
     extends AbstractController(dcc)
     with play.api.i18n.I18nSupport {
@@ -40,6 +60,10 @@ class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRep
   private val form: Form[MovieForm] = {
     import play.api.data.Forms._
 
+    /**
+     * Build a representation of our form, mapping field names
+     * to Filters.
+     */
     Form(
       mapping(
         "title" -> nonEmptyText,
@@ -90,6 +114,13 @@ class MovieController @Inject()(dcc: DefaultControllerComponents, repo: MovieRep
     }
   }
 
+  /**
+   * Parse form input, and return a result based on its success or failure.
+   * @param request   The HTTP request containing form-data in the body
+   * @tparam A        The type of the
+   * @return          BadRequest if there are errors in the form; otherwise
+   *                  the result of submitting a new movie to the repository
+   */
   private def processFormInput[A]()(implicit request: Request[A]): Future[Result] = {
     def failure(bad: Form[MovieForm]) = {
       Future.successful(BadRequest(form.errorsAsJson))

@@ -2,10 +2,10 @@ package movies
 
 import controllers.MovieController
 import javax.inject.Inject
+import play.api.Logger
 import play.api.routing.Router.Routes
 import play.api.routing.SimpleRouter
 import play.api.routing.sird._
-import play.api.Logger
 
 /**
  * A custom Router object that uses Play's SIRD

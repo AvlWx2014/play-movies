@@ -1,16 +1,15 @@
 package persistence
 
 import java.text.SimpleDateFormat
-import java.util.{Date, Locale, UUID}
+import java.util.{Date, Locale}
 
 import akka.actor.ActorSystem
 import controllers.MovieForm
 import javax.inject.{Inject, Singleton}
-import org.bson.codecs.ObjectIdGenerator
 import org.bson.types.ObjectId
-import play.api.{Logger, MarkerContext}
 import play.api.libs.concurrent.CustomExecutionContext
-import play.api.libs.json.{Format, JsPath, JsResult, JsString, JsSuccess, JsValue, Json, Reads, Writes}
+import play.api.libs.json._
+import play.api.{Logger, MarkerContext}
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -180,6 +179,14 @@ abstract class AbstractMovieRepository @Inject()(implicit ec: DataExecutionConte
 class DataExecutionContext @Inject()(actorSystem: ActorSystem)
   extends CustomExecutionContext(actorSystem, "data.persistence")
 
+/**
+ * A list-backed implementation of `AbstractMovieRepository` to make sure
+ * routing, model serialization to JSON, and form input parsing work
+ * without the overhead of the database.
+ *
+ * @param ec      An implicit custom ExecutionContext to avoid repository
+ *                operations on Play's main ExecutionContext
+ */
 @Singleton
 class TestMovieRepositoryImpl @Inject()()(implicit ec: DataExecutionContext)
     extends AbstractMovieRepository {

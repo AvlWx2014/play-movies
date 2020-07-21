@@ -17,6 +17,8 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
   @Provides
   def provideDatabase(codecRegistry: CodecRegistry): MongoDatabase = {
     // connect directly to port 27017 by default
+    // here, the connect string is {scheme}://{hostname}
+    // where hostname corresponds to a docker container name
     val mongoClient = MongoClient("mongodb://mongo")
     mongoClient.getDatabase("demo").withCodecRegistry(codecRegistry)
   }

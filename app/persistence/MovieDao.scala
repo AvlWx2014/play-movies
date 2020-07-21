@@ -6,7 +6,6 @@ import javax.inject.{Inject, Singleton}
 import org.bson.types.ObjectId
 import org.mongodb.scala.{Document, MongoDatabase}
 import play.api.{Logger, MarkerContext}
-import play.libs.Akka
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
